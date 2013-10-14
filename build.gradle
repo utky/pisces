@@ -1,0 +1,51 @@
+// Pull the plugin from a Maven Repo
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.eriwen:gradle-js-plugin:1.4.0'
+    }
+}
+// Invoke the plugin
+apply plugin: 'js'
+
+defaultTasks 'gzipjs'
+
+javascript.source {
+    dev {
+        js {
+            srcDir 'src/main/js'
+            include '*.js'
+            exclude '*all.js'
+            exclude '*min.js'
+        }
+    }
+}
+
+task clean << {
+    delete file("${buildDir}")
+}
+
+// Specify a collection of files to be combined, then minified and finally GZip compressed.
+task combinejs(type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+    source = javascript.source.dev.js.files
+    dest = file("${buildDir}/pisces-all.js")
+}
+
+task minifyjs(type: com.eriwen.gradle.js.tasks.MinifyJsTask) {
+    source = combinejs
+    dest = file("${buildDir}/pisces-min.js")
+    closure {
+        warningLevel = 'QUIET'
+    }
+}
+
+task gzipjs(type: com.eriwen.gradle.js.tasks.GzipJsTask) {
+    source = minifyjs
+    dest = file("${buildDir}/pisces-min.js.gz")
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.7'
+}
