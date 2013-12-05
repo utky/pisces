@@ -13,12 +13,20 @@ apply plugin: 'js'
 defaultTasks 'gzipjs'
 
 javascript.source {
+    
     dev {
         js {
             srcDir 'src/main/js'
             include '*.js'
             exclude '*all.js'
             exclude '*min.js'
+        }
+    }
+
+    test {
+        js {
+           srcDir 'src/test/js'
+           include '*.js'
         }
     }
 }
@@ -31,6 +39,11 @@ task clean << {
 task combinejs(type: com.eriwen.gradle.js.tasks.CombineJsTask) {
     source = javascript.source.dev.js.files
     dest = file("${buildDir}/pisces-all.js")
+}
+
+task testcombinejs(dependsOn: combinejs, type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+    source = javascript.source.test.js.files
+    dest = file("${buildDir}/pisces-test-all.js")
 }
 
 task minifyjs(type: com.eriwen.gradle.js.tasks.MinifyJsTask) {

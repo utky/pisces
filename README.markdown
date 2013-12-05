@@ -16,42 +16,79 @@ T.B.D.
 Usage
 ----
 
-T.B.D.
-
 ### Create a socket
 
-  var url = 'ws://host.name/path/to/websocket/wamp.endpoint';
-  var p = pisces(url);
+```
+// create new socket by instantiate pisces
+var endpoit = 'ws://host.name/path/to/websocket/wamp.endpoint';
+var p = pisces({url : endpoit});
 
-  var id = p.id;
-  var reuse = pisces(id);
+// get existing socket
+var id = p.id; // pisces has identifier to reuse instance
+var reuse = pisces(id);
+
+```
 
 ### Wrap WebSocket
 
-  var ws = new WebSocket(url);
-  var p = pisces(ws);
+```
+// explicitly specify websocket
+var ws = new WebSocket(url);
+var p = pisces({ws : ws});
+
+```
+### Configure URL abbreviation
+
+```
+/*
+ * Specify prefix and URI mapping with object literal
+ * name : prefix
+ * value : URI
+ */
+p.prefix({
+  'procA' : 'http://host.name/websocket/procA',
+  'procB' : 'http://host.name/websocket/procB',
+  'topicA' : 'http://host.name/websocket/topicA'
+});
+
+```
 
 ### Send a message to procedure
 
-  var params = { first : 1, second : '2nd' };
-  p.proc('procname:methodname')
-    .handlers()
-    .onmessage(function(response) {alert(response)})
-    .send(params);
+```
+// get procedure with CURIE name
+p.proc('procA:methodname')
+  // setup callback on response if necessary
+  .onresult(function(data) {alert(data)})
+  // execute sending request to the procedure
+  .send('firstPram', 'secondParam', { name : 'thirdParam', value : 'thirdValue'});
+```
 
 ### Publish a message to topic
 
-Models
+```
+// get topic with CURIE name
+p.proc('topicA')
+  // setup callback on response if necessary
+  .onevent(function(data) {alert(data)})
+  // execute sending request to the procedure
+  .send('firstPram', 'secondParam', { name : 'thirdParam', value : 'thirdValue'});
+```
+Model Structure
 ----
 
 <pre>
 Context : per document
-+  pisces : per WebSocket
-   Session
-   |
-   +--- Queue (is the name "Queue" correct?)
-   |
-   +--- Topic
+  pisces : per Session
+    Session : means websocket
+      Dispatcher : event listener as `WebSocket.onmessage`
+        | memo: dispatcher should create EVENT from message
+        Chain : contains user callbacks
+    Procedure
+    Topic
+  Protocol
+    Type
+      Wel
 </pre>
 
 ### pisces
